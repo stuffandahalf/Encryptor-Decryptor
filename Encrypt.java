@@ -59,42 +59,42 @@ public class Encrypt {
             int tempPattern = pattern[indPattern1];
             pattern[indPattern1] = pattern[indPattern2];
             pattern[indPattern2] = tempPattern;
-        }
-        
-        
-        String encrypted = "";
-        for(int i = 0; i < 64; i++)
+        }        
+        String output = "";
+        while(fileString.length() > 0)
         {
-            encrypted += alphabet.charAt(origAlphabet.indexOf(fileString.charAt(0)));
-            if(fileString.length() == 0)
+            String encrypted = "";
+            for(int i = 0; i < 64; i++)
             {
-                break;
-            }
-            fileString = fileString.substring(1, fileString.length());
-        }
-        
-        char[][] encryptedMatrix = new char[8][8];
-        
-        for(int i = 0; i < 8; i++)
-        {
-            for(int j = 0; j < 8; j++)
-            {
-                encryptedMatrix[i][j] = encrypted.charAt(0);
-                if(encrypted.length() == 0)
+                if(fileString.length() == 0)
                 {
                     break;
                 }
-                encrypted = encrypted.substring(1, encrypted.length());
+                encrypted += alphabet.charAt(origAlphabet.indexOf(fileString.charAt(0)));
+                fileString = fileString.substring(1, fileString.length());
             }
-        }
-        
-        System.out.println(Arrays.deepToString(encryptedMatrix));
-        String output = "";
-        for(int j : pattern)
-        {
+            char[][] encryptedMatrix = new char[8][8];
+            
             for(int i = 0; i < 8; i++)
             {
-                output += encryptedMatrix[i][j];
+                for(int j = 0; j < 8; j++)
+                {
+                    if(encrypted.length() == 0)
+                    {
+                        break;
+                    }
+                    encryptedMatrix[i][j] = encrypted.charAt(0);
+                    encrypted = encrypted.substring(1, encrypted.length());
+                }
+            }
+                
+            for(int j : pattern)
+            {
+                //System.out.println(j);
+                for(int i = 0; i < 8; i++)
+                {
+                    output += encryptedMatrix[i][j];
+                }
             }
         }
         System.out.println(output);
