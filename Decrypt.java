@@ -5,15 +5,15 @@ public class Decrypt {
 	
 	public static void main (String args[]) throws IOException
     {
-		//String key = args[0];
-        //File in = new File(args[1]);
-        //String out = args[2];
+		//final String key = args[0].toUpperCase;
+        //final File in = new File(args[1]);
+        //final String out = args[2];
         
         final String key = "ABCDEFGH";                                // variable to store encryption key
         final File in = new File("input.txt");                         // variable to store input file
         final String outFile = "output.txt";                         // name of output file
         
-        final int SQUARE = 8;                                   // square root of number of chars to work with at a time
+        final int SQUARE = 8;
         
         int hash = key.hashCode();                              // hashed key
         Random random = new Random(hash);                       // created random generator using hashed value as seed
@@ -21,56 +21,60 @@ public class Decrypt {
         String fileString ="";                                  // created a variable to hold the contents of the input file
         while(scanner.hasNext())                                // appended every value from the scanner to the variable
         {
-            fileString += scanner.next() + " ";
+            fileString += scanner.nextLine();
         }
         fileString = fileString.toUpperCase();                  // converted the input text to uppercase
         
-        String encryptedAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";        // created a variable to store the alphabet to be encryoted
-        final String origAlphabet = encryptedAlphabet;            // made another variable to store the original alphabet before encrytion
-        
-        encryptedAlphabet = alphabetEncryptor(hash, encryptedAlphabet);
-        System.out.println(origAlphabet);
-        
-        fileString = stringStripper(fileString, origAlphabet);
-        
-        System.out.println(fileString);
-        
-        int[] pattern = pattern(hash, SQUARE);
-        
-        System.out.println(Arrays.toString(pattern));
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";        // created a variable to store the proper alphabet
+        String origAlphabet = alphabet;                         // made another variable to store the alphabet for later
+        alphabet = alphabetEncryptor(hash, alphabet);           // replaced the alphabet with an encrypted version
+        //System.out.println(alphabet);
+        int[] pattern = pattern(hash, SQUARE);                  // generated the pattern used to read the array
+        //System.out.println(fileString);
         
         String decryptedString = "";                            // location to store the decrypted string
-        
-        char[][] encryptedArray = encryptedToArray(fileString, SQUARE, pattern);
-        
         String encryptedString = "";                            // location to store the re-sorted string
-        for(int i = 0; i < SQUARE; i++)
+        while(fileString.length() > 0)
         {
-            for(int j = 0; j < SQUARE; j++)
+            char[][] encryptedArray = encryptedArray(SQUARE, fileString, pattern);              // temporary array of 64 encrypted characters
+            if(fileString.length() >= 64)                                                       // removes the 64 characters from the string
             {
-                encryptedString += encryptedArray[i][j];        // add all of the sorted characters to the string
+                fileString = fileString.substring((SQUARE*SQUARE), fileString.length());
+            }
+            else                                                    // if there is less than 64 characters left in the string
+            {                                                       // clear the string
+                fileString = "";
+            }
+            for(int i = 0; i < SQUARE; i++)                         // for every row
+            {
+                for(int j = 0; j < SQUARE; j++)                     // for every column
+                {   
+                    encryptedString += encryptedArray[i][j];        // add all of the sorted characters to the string
+                }
             }
         }
-        System.out.println(encryptedString);
         while(encryptedString.length() > 0)                     // while there are values to decrypt
         {
-            decryptedString += origAlphabet.charAt(encryptedAlphabet.indexOf(encryptedString.charAt(0)));    // match the letter to the original and add it to the new string
+            decryptedString += origAlphabet.charAt(alphabet.indexOf(encryptedString.charAt(0)));    // match the letter to the original and add it to the new string
             encryptedString = encryptedString.substring(1, encryptedString.length());       // remove the first character of the encrypted string
         }
-        
         System.out.println(decryptedString);
         
         PrintWriter out = new PrintWriter(outFile);
         out.println(decryptedString);
         out.close();
-        //System.out.println(Arrays.deepToString(encryptedArray));
         
 	}
     
+    /**
+     * @param hash
+     * @param alphabet
+     * @return
+     */
     public static String alphabetEncryptor(int hash, String alphabet)
     {
         Random random = new Random(hash);
-        for(int i = 0; i < 100; i++)                            // replace two random letters in the alphabet 100 times
+        for(int i = 0; i < 100; i++)                            // swap two random letters in the alphabet 100 times
         {
             int indLetter1 = random.nextInt(27);
             int indLetter2 = random.nextInt(27);
@@ -83,6 +87,11 @@ public class Decrypt {
         return alphabet;
     }
     
+    /**
+     * @param hash
+     * @param size
+     * @return
+     */
     public static int[] pattern(int hash, int size)
     {
         int[] pattern = new int[size];
@@ -90,8 +99,8 @@ public class Decrypt {
         {
             pattern[i] = i;
         }
-        Random random = new Random(hash);                              // reset the random generator
-        for(int i = 0; i < 100; i++)                            // swap two random numbers in the order for reading
+        Random random = new Random(hash);                       // set the random generator
+        for(int i = 0; i < 100; i++)                            // swap two random numbers in the order 100 times
         {
             int indPattern1 = random.nextInt(8);
             int indPattern2 = random.nextInt(8);
@@ -102,43 +111,27 @@ public class Decrypt {
         return pattern;
     }
     
-    public static String stringStripper(String fileString, String origAlphabet)
+    /**
+     * @param SQUARE
+     * @param fileString
+     * @param pattern
+     */
+    public static char[][] encryptedArray(int SQUARE, String fileString, int[] pattern)
     {
-        String strippedFileString = "";
-        for(int i = 0; i < fileString.length(); i++)            // for every character in the text
+        char[][] encryptedArray= new char[SQUARE][SQUARE];      // created a square 2d array to store the encrypted characters
+        for(int j = 0; j < SQUARE; j++)
         {
-            if(origAlphabet.indexOf(fileString.charAt(i)) != -1)    // check if it is in the original alphabet
+            for(int i = 0; i < SQUARE; i++)
             {
-                strippedFileString += fileString.charAt(i);         // concatenate it if it is
-            }
-            else if(origAlphabet.indexOf(fileString.charAt(i)) == -1)
-            {
-                strippedFileString += " ";                          // add a space if it is not
-            }
-        }
-        return strippedFileString;
-    }
-    
-    public static char[][] encryptedToArray(String fileString, int SQUARE, int[] pattern)
-    {
-        char[][] encryptedArray = new char[SQUARE][SQUARE];      // created a square 2d array to store the encrypted characters
-        for(int j = SQUARE-1; j >= 0; j--)
-        {
-            for(int i = SQUARE-1; i >= 0; i--)
-            {
-                //System.out.println(i);
                 if(fileString.length() == 0)            // fill the array while there are values left in the string
                 {
                     break;
                 }
-                encryptedArray[i][pattern[j]] = fileString.charAt(fileString.length()-2);       // filled the array with the string from the file
-                fileString = fileString.substring(0, fileString.length()-1);
+                encryptedArray[i][pattern[j]] = fileString.charAt(0);       // filled the array with the first character from the file
+                fileString = fileString.substring(1, fileString.length());  // removed the character from the string
             }
         }
         return encryptedArray;
     }
-    
-    
-            
 }
 
